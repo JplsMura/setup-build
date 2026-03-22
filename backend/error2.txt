@@ -1,0 +1,8 @@
+
+Fatal error: Uncaught RuntimeException: Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.4.0". You are running 8.2.30. in /var/www/html/vendor/composer/platform_check.php:22
+Stack trace:
+#0 /var/www/html/vendor/composer/autoload_real.php(25): require()
+#1 /var/www/html/vendor/autoload.php(22): ComposerAutoloaderInitc57754c93ae34ac3b9b716a0fd2f2149::getLoader()
+#2 /var/www/html/artisan(10): require('/var/www/html/v...')
+#3 {main}
+  thrown in /var/www/html/vendor/composer/platform_check.php on line 22
