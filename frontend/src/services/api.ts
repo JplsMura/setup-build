@@ -2,8 +2,9 @@ import axios from 'axios';
 
 // Instância base do Axios
 export const api = axios.create({
-  baseURL: '/api', 
-  withCredentials: true, // Adiciona envio obrigatório do Cookie CSRF
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
+  withXSRFToken: true,
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -24,7 +25,11 @@ api.interceptors.response.use(
     if (error.response?.status === 419) {
       console.warn("Sessão HTTP do Sanctum expirou. O Request falhou.");
     }
-    
+
     return Promise.reject(error);
   }
 );
+
+export const csrf = () => api.get('/sanctum/csrf-cookie', {
+  baseURL: 'http://localhost:8000'
+});

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, Box, HardDrive, Gamepad2, Database, Zap, Sparkles } from 'lucide-react';
+import { Cpu, Box, HardDrive, Gamepad2, Database, Zap, Sparkles, Fan } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { api, csrf } from '../api';
+import { api, csrf } from '../services/api';
 
 type ComponentModel = {
   id: string;
@@ -13,6 +13,7 @@ type ComponentModel = {
 
 const CATEGORIES = [
   { id: 'cpu', name: 'Processador (CPU)', icon: Cpu },
+  { id: 'cooler', name: 'Cooler / Watercooler', icon: Fan },
   { id: 'motherboard', name: 'Placa Mãe', icon: Box },
   { id: 'ram', name: 'Memória RAM', icon: Database },
   { id: 'gpu', name: 'Placa de Vídeo (GPU)', icon: Gamepad2 },
@@ -36,7 +37,7 @@ export default function SetupBuilder() {
 
   const handleSelect = (categoryId: string, compId: string) => {
     const comp = dbComponents.find(c => c.id === compId);
-    if(comp) {
+    if (comp) {
       setSelections(prev => ({ ...prev, [categoryId]: comp }));
     }
   };
@@ -46,11 +47,11 @@ export default function SetupBuilder() {
   const handleSubmit = async () => {
     if (!isFormComplete) return;
     setIsEvaluating(true);
-    
+
     try {
       await csrf(); // Puxa o cookie CSRF de autenticação
       const componentIds = Object.values(selections).map(c => c.id);
-      
+
       const payload = {
         title: setupTitle,
         description: "Montagem Inteligente através do Setup Builder",
@@ -64,9 +65,9 @@ export default function SetupBuilder() {
     } catch (err: any) {
       console.error(err);
       if (err.response?.status === 401) {
-          alert('Erro: Você precisa estar logado para salvar e testar a Build com a IA!');
+        alert('Erro: Você precisa estar logado para salvar e testar a Build com a IA!');
       } else {
-          alert('Erro desconhecido ao validar hardware.');
+        alert('Erro desconhecido ao validar hardware.');
       }
       setIsEvaluating(false);
     }
@@ -87,29 +88,29 @@ export default function SetupBuilder() {
       <div className="flex flex-col xl:flex-row gap-8 lg:gap-12">
         {/* Formulário de Componentes (Esquerda) */}
         <div className="flex-1 space-y-5">
-           
+
           {/* Título do Setup */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-             <h3 className="font-bold text-slate-800 text-[16px] mb-3">Nome da Build</h3>
-             <input 
-                type="text" 
-                placeholder="Exemplo: Máquina de Guerra 4K Ultra" 
-                className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-semibold focus:outline-none focus:ring-4 focus:ring-[#6532C2]/10 focus:border-[#6532C2] transition-all placeholder:font-medium placeholder:text-slate-400"
-                value={setupTitle}
-                onChange={(e) => setSetupTitle(e.target.value)}
-             />
+            <h3 className="font-bold text-slate-800 text-[16px] mb-3">Nome da Build</h3>
+            <input
+              type="text"
+              placeholder="Exemplo: Máquina de Guerra 4K Ultra"
+              className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-semibold focus:outline-none focus:ring-4 focus:ring-[#6532C2]/10 focus:border-[#6532C2] transition-all placeholder:font-medium placeholder:text-slate-400"
+              value={setupTitle}
+              onChange={(e) => setSetupTitle(e.target.value)}
+            />
           </div>
 
           {CATEGORIES.map((category) => {
             const Icon = category.icon;
             const hasSelection = !!selections[category.id];
-            
+
             // Filtra o catálogo do banco de dados pelo tipo da categoria
             const options = dbComponents.filter(c => c.type === category.id);
-            
+
             return (
-              <div 
-                key={category.id} 
+              <div
+                key={category.id}
                 className={`bg-white p-5 rounded-2xl border transition-all duration-300 ${hasSelection ? 'border-[#6532C2]/40 shadow-sm shadow-purple-900/5' : 'border-slate-200'}`}
               >
                 <div className="flex items-center gap-4 mb-4">
@@ -123,8 +124,8 @@ export default function SetupBuilder() {
                     </p>
                   </div>
                 </div>
-                
-                <select 
+
+                <select
                   className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 font-semibold focus:outline-none focus:ring-4 focus:ring-[#6532C2]/10 focus:border-[#6532C2] transition-all cursor-pointer appearance-none hover:bg-slate-100"
                   value={selections[category.id]?.id || ''}
                   onChange={(e) => handleSelect(category.id, e.target.value)}
@@ -144,13 +145,13 @@ export default function SetupBuilder() {
         <div className="w-full xl:w-[420px]">
           <div className="bg-[#0F172A] rounded-[24px] p-6 lg:p-8 sticky top-[100px] shadow-2xl shadow-indigo-900/20 border border-slate-800">
             <h3 className="text-xl font-bold text-white mb-6">Build Summary</h3>
-            
+
             <div className="space-y-4 mb-8">
               <div className="flex justify-between items-start border-b border-slate-800/80 pb-3">
-                  <span className="text-sm text-slate-400 font-medium">Nome</span>
-                  <span className={`text-[13px] font-bold text-right max-w-[200px] line-clamp-1 ${setupTitle ? 'text-purple-400' : 'text-slate-600'}`}>
-                    {setupTitle || '...' }
-                  </span>
+                <span className="text-sm text-slate-400 font-medium">Nome</span>
+                <span className={`text-[13px] font-bold text-right max-w-[200px] line-clamp-1 ${setupTitle ? 'text-purple-400' : 'text-slate-600'}`}>
+                  {setupTitle || '...'}
+                </span>
               </div>
               {CATEGORIES.map(cat => (
                 <div key={cat.id} className="flex justify-between items-start border-b border-slate-800/80 pb-3">
@@ -162,12 +163,12 @@ export default function SetupBuilder() {
               ))}
             </div>
 
-            <button 
+            <button
               disabled={!isFormComplete || isEvaluating}
               onClick={handleSubmit}
               className={`w-full py-4 rounded-xl flex items-center justify-center gap-3 font-bold text-[15px] transition-all duration-300
-                ${!isFormComplete 
-                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50' 
+                ${!isFormComplete
+                  ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700/50'
                   : 'bg-[#6532C2] text-white hover:bg-[#5b2cb0] shadow-[0_0_20px_rgba(101,50,194,0.3)] hover:shadow-[0_0_30px_rgba(101,50,194,0.5)] border border-purple-500/50'
                 }
               `}

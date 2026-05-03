@@ -10,6 +10,7 @@ class ComponentController extends Controller
     public function index()
     {
         // Retorna todos os componentes agrupados se o frontend quiser, ou lista plana
-        return response()->json(Component::all());
+        $components = Component::all();
+        return response()->json($components);
     }
 }
